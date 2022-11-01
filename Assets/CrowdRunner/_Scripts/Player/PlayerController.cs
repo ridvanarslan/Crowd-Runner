@@ -5,10 +5,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header(" Elements ")] 
-    [SerializeField] [Range(1f,10f)] private CrowdSystem crowdSystem;
+    [SerializeField] private CrowdSystem crowdSystem;
     
     [Header(" Settings ")] 
-    [SerializeField] [Range(1f,10f)] private float moveSpeed;
+    [SerializeField] [Range(1f,15f)] private float moveSpeed;
     
     [Header(" Controls ")]
     [SerializeField] [Range(1f,10f)] private float slideSpeed;
