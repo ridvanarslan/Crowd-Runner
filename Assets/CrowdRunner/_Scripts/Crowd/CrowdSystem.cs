@@ -8,6 +8,7 @@ using UnityEngine;
 public class CrowdSystem : MonoBehaviour
 {
     [Header(" Elements ")]
+    [SerializeField] private PlayerAnimator playerAnimator;
     [SerializeField] private Transform runnersParent;
     [SerializeField] private Transform runnersPoolParent;
     [Header(" Settings ")]
@@ -33,6 +34,7 @@ public class CrowdSystem : MonoBehaviour
             var childLocalPosition = GetRunnerLocalPosition(i);
             runnersParent.GetChild(i).localPosition = childLocalPosition;
         }
+        
     }
 
     private Vector3 GetRunnerLocalPosition(int index)
@@ -51,26 +53,31 @@ public class CrowdSystem : MonoBehaviour
             case BonusType.Addition:
                 AddRunners(bonusAmount);
                 PlaceRunners();
+                CrowdCounter.onCrowdCountChanged?.Invoke(bonusAmount);
+                playerAnimator.Run();
                 break;
             case BonusType.Difference:
                 RemoveRunners(bonusAmount);
                 PlaceRunners();
+                CrowdCounter.onCrowdCountChanged?.Invoke(bonusAmount * -1);
                 break;
             case BonusType.Multiply:
                 var runnerToAdd = (runnersParent.childCount * bonusAmount) - runnersParent.childCount;
                 AddRunners(runnerToAdd);
                 PlaceRunners();
+                CrowdCounter.onCrowdCountChanged?.Invoke(runnerToAdd);
+                playerAnimator.Run();
                 break;
             case BonusType.Division:
                 var runnersToRemove = (runnersParent.childCount / bonusAmount);
                 RemoveRunners(runnersToRemove);
                 PlaceRunners();
+                CrowdCounter.onCrowdCountChanged?.Invoke(runnersToRemove);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(bonusType), bonusType, null);
         }
     }
-
     private void AddRunners(int amount)
     {
         for (int i = 0; i < amount; i++)
@@ -84,7 +91,6 @@ public class CrowdSystem : MonoBehaviour
         }
 
     }
-
     private void RemoveRunners(int amount)
     {
         if (amount> runnersParent.childCount) amount = runnersParent.childCount;

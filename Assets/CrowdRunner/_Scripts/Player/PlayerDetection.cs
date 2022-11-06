@@ -9,23 +9,38 @@ public class PlayerDetection : MonoBehaviour
     [Header(" Elements ")] 
     [SerializeField] private CrowdSystem crowdSystem;
 
-    private void OnTriggerEnter(Collider other)
+    [Header(" Events ")] 
+    public static Action onDoorsHitSound;
+
+    private void Update()
     {
-        if (other.TryGetComponent<Doors>(out var door))
+        if (GameManager.Instance.GameState == GameState.Game)
         {
-            var bonusAmount = door.GetBonusAmount(this.transform.position.x);
-            var bonusType = door.GetBonusType(this.transform.position.x);
-            crowdSystem.ApplyBonus(bonusType, bonusAmount);
-            door.Disable();
-        }
-        else if (other.CompareTag("Finish"))
-        {
-            print("we hit finish.");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            DetectDoors();
         }
     }
 
     private void DetectDoors()
     {
+        var detectedColliders = Physics.OverlapSphere(transform.position, 1);
+
+        for (int i = 0; i < detectedColliders.Length; i++)
+        {
+            if (detectedColliders[i].TryGetComponent<Doors>(out var door))
+            {
+                var bonusAmount = door.GetBonusAmount(this.transform.position.x);
+                var bonusType = door.GetBonusType(this.transform.position.x);
+                
+                door.Disable();
+                crowdSystem.ApplyBonus(bonusType, bonusAmount);
+                onDoorsHitSound?.Invoke();
+            }
+            else if (detectedColliders[i].CompareTag("Finish"))
+            {
+                GameManager.Instance.SetGameState(GameState.LevelComplete);
+                print(ChunkManager.Instance.GetLevel());
+                ChunkManager.Instance.SetLevel();
+            }
+        }
     }
 }
